@@ -16,6 +16,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xVhd** manages VHDs in a Hyper-V host. 
 * **xVMHyperV** manages VMs in a Hyper-V host.
 * **xVMSwitch** manages virtual switches in a Hyper-V host. 
+* **xVMHardDiskDrive** manages the VHD(x) attached to VM on a Hyper-V host.
 * **xVhdFileDirectory** manages files or directories in a VHD. 
 You can use it to copy files/folders to the VHD, remove files/folders from a VHD, and change attributes of a file in a VHD (e.g. change a file attribute to 'ReadOnly' or 'Hidden').
 This resource is particularly useful when bootstrapping DSC Configurations into a VM. 
@@ -74,9 +75,34 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 * **FileDirectory**: The FileDirectory objects to copy to the VHD (as used in the "File" resource). 
 Please see the Examples section for more details. 
 
+### xVMHardDiskDrive
+
+* **VmName**: Specifies the name of the virtual machine whose hard disk drive is to be manipulated.
+* **VhdPath**: Specifies the full path of the VHD file to be manipulated.
+* **ControllerType**: Specifies the type of controller to which the the hard disk drive is to be set: { IDE | SCSI }.
+* **ControllerNumber**: Specifies the number of the controller to which the hard disk drive is to be set. For IDE: { 0,1 }, for SCSI: { 0 | 1 | 2 | 3 }.
+* **ControllerLocation**: Specifies the number of the location on the controller at which the hard disk drive is to be set. For IDE: { 0 | 1 }, for SCSI: { 0 .. 63 }.
+* **Ensure**: Specifies if the hard disk drive should exist or not.
+
+Remarks:
+* When Ensure is 'Absent', the ControllerType, ControllerNumber and ControllerLocation are not used.
+* When ControllerType is not provided, it defaults to SCSI
+* When ControllerNumber or ControllerLocation is not provided, the same logic as Set-VMHardDiskDrive cmdlet is used.  
+
+### xVMScsiController
+* **VmName**: pecifies the name of the virtual machine whose SCSI controller is to be manipulated.
+* **ControllerNumber**: Specifies the number of the controller to be set: { 0 | 1 | 2 | 3 }.
+* **Ensure**: Specifies if the SCSI controller should exist or not.
+
+Remarks:
+* When there is only 1 SCSI controller and ControllerNumber 3 is passed during an Ensure=Present, all the intermediate controllers will also be created.
+* When Ensure=Absent, all the disks still connected to the controller will be detached.
+
 ## Versions
 
 ### Unreleased
+* Added the xVMHardDiskDrive resource, allowing manipulation of Hard Disk Drives connected to a VM
+* Added the xVMScsiController resource, allowing manipulation of SCSI controllers connected to a VM
 
 ### 3.5.0.0
 * Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
