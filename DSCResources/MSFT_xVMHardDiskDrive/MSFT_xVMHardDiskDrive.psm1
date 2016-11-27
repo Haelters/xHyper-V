@@ -43,10 +43,10 @@ function Get-TargetResource
     )
 
     $hardDiskDrive = Get-VMHardDiskDrive -VMName $VMName -ErrorAction Stop | Where-Object { $_.Path -eq $Path } 
-
+    Write-Verbose "the result of the get is: $hardDiskDrive"
     $returnValue = @{
         VMName = $VMName
-        Path = $Path
+        Path = if ($hardDiskDrive) {$hardDiskDrive.Path} else {$null}
         ControllerType = if ($hardDiskDrive) {$hardDiskDrive.ControllerType} else {$null}
         ControllerNumber = if ($hardDiskDrive) {$hardDiskDrive.ControllerNumber} else {$null}
         ControllerLocation = if ($hardDiskDrive) {$hardDiskDrive.ControllerLocation} else {$null}
@@ -96,7 +96,7 @@ function Set-TargetResource
         [System.UInt32]
         $ControllerNumber,
 
-        [ValidateSet({return $_ -lt 64})]
+        [ValidateRange(0,63)]
         [System.UInt32]
         $ControllerLocation,
 
@@ -116,6 +116,7 @@ function Set-TargetResource
         if ($hardDiskDrive) 
         {
             Write-Verbose ($localizedData.FoundDiskButWithWrongSettings)
+            $PSBoundParameters.Remove('VMName')
             $PSBoundParameters.Remove('Path')
             # As the operation is a move, we must use ToController... instead of Controller...
             if ($PSBoundParameters.ContainsKey('ControllerType')) 
@@ -133,7 +134,7 @@ function Set-TargetResource
                 $PSBoundParameters.Remove('ControllerLocation')
                 $PSBoundParameters.Add('ToControllerLocation', $ControllerLocation)
             }
-            $hardDiskDrive | Set-VMHardDiskDrive @PSBoundParameters 
+            $hardDiskDrive | Set-VMHardDiskDrive @PSBoundParameters
             return
         }
         
@@ -156,7 +157,7 @@ function Set-TargetResource
         }
 
         Write-Verbose ($localizedData.AddingTheDiskToTheFreeLocation)
-        Add-VMHardDiskDrive @PSBoundParameters -Path $Path
+        Add-VMHardDiskDrive @PSBoundParameters 
 
     } 
     else # We must ensure that the disk is absent
@@ -215,7 +216,7 @@ function Test-TargetResource
         [System.UInt32]
         $ControllerNumber,
 
-        [ValidateSet({return $_ -lt 64})]
+        [ValidateRange(0,63)]
         [System.UInt32]
         $ControllerLocation,
 
@@ -225,12 +226,17 @@ function Test-TargetResource
         $Ensure
     )
 
-    $PSBoundParameters.Remove('Ensure')
-    $resource = Get-TargetResource @PSBoundParameters
+    $resource = Get-TargetResource -VMName $VMName -Path $Path
+
+    if ($ControllerType -eq 'IDE' -and ($ControllerNumber -gt 1 -or $ControllerLocation -gt 1))
+    {
+       throw ($localizedData.NumberOrLocationOutOfBounds -f $ControllerNumber, $ControllerLocation) 
+    }
 
     $result = $true
     foreach ($key in $resource.Keys)
     {
+        Write-Verbose ($localizedData.ComparingDesiredActual -f $key, $PSBoundParameters[$key], $resource[$key])
         $result = $result -and ($PSBoundParameters[$key] -eq $resource[$key])
     }
 

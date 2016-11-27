@@ -7,4 +7,5 @@ ConvertFrom-StringData @'
     RemovingDriveFromController = Removing drive {0} from the controller.
     RemovingController = Removing the controller {0} from the VM.
     RestartingVM = Restarting the VM as it was shutdown to manipulate the controller.
+    ComparingDesiredActual = Comparing the actual to the desired value for {0}: {1} vs {2}
 '@

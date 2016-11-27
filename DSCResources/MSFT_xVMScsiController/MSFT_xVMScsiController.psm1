@@ -102,14 +102,14 @@ function Set-TargetResource
             $scsiControllerCount = (Get-VMScsiController -VMName $VMName).count
             while ($scsiControllerCount -le $ControllerNumber)
             {
-                Write-Verbose ($localizedData.AddingAdditionalController -f ($scsiControllerCount - 1))
+                Write-Verbose ($localizedData.AddingAdditionalController -f $scsiControllerCount)
                 Add-VMScsiController -VMName $VMName
                 $scsiControllerCount++
             } 
         }
         else 
         {
-            Write-Verbose ($localizedData.AddingAdditionalController -f ($scsiControllerCount - 1))
+            Write-Verbose ($localizedData.AddingAdditionalController -f $scsiControllerCount)
             Add-VMScsiController -VMName $VMName
         }
     }
@@ -168,12 +168,13 @@ function Test-TargetResource
         $ControllerNumber
     )
 
-    $PSBoundParameters.Remove('Ensure')
+    $notImportant = $PSBoundParameters.Remove('Ensure')
     $resource = Get-TargetResource @PSBoundParameters
 
     $result = $true
     foreach ($key in $resource.Keys)
     {
+        Write-Verbose ($localizedData.ComparingDesiredActual -f $key, $PSBoundParameters[$key], $resource[$key])
         $result = $result -and ($PSBoundParameters[$key] -eq $resource[$key])
     }
 
