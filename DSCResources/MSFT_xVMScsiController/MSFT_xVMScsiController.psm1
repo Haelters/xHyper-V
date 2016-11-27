@@ -133,7 +133,6 @@ function Set-TargetResource
         Write-Verbose $localizedData.RestartingVM
         Start-VM -Name $VmName
     } 
-
 }
 
 <#

@@ -158,7 +158,6 @@ function Set-TargetResource
 
         Write-Verbose ($localizedData.AddingTheDiskToTheFreeLocation)
         Add-VMHardDiskDrive @PSBoundParameters 
-
     } 
     else # We must ensure that the disk is absent
     {
@@ -228,6 +227,7 @@ function Test-TargetResource
 
     $resource = Get-TargetResource -VMName $VMName -Path $Path
 
+    # Throw a readable exception when the ControllerNumber or the ControllerLocation are out of bounds for IDE
     if ($ControllerType -eq 'IDE' -and ($ControllerNumber -gt 1 -or $ControllerLocation -gt 1))
     {
        throw ($localizedData.NumberOrLocationOutOfBounds -f $ControllerNumber, $ControllerLocation) 
