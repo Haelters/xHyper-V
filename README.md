@@ -17,6 +17,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xVMHyperV** manages VMs in a Hyper-V host.
 * **xVMSwitch** manages virtual switches in a Hyper-V host. 
 * **xVMHardDiskDrive** manages the VHD(x) attached to VM on a Hyper-V host.
+* **xVMScsiController** manages the SCSI controllers attached to VM on a Hyper-V host.
 * **xVhdFileDirectory** manages files or directories in a VHD. 
 You can use it to copy files/folders to the VHD, remove files/folders from a VHD, and change attributes of a file in a VHD (e.g. change a file attribute to 'ReadOnly' or 'Hidden').
 This resource is particularly useful when bootstrapping DSC Configurations into a VM. 
